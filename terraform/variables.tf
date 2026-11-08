@@ -181,3 +181,30 @@ variable "root_domain" {
   type        = string
   default     = "makeasy.id.vn"
 }
+
+# --- Integration: Lazada Open Platform (seller-inhouse, Vietnam) -----------
+# Keep false until app credentials exist in a private TF variable source.
+variable "lazada_live_enabled" {
+  type    = bool
+  default = false
+}
+variable "lazada_app_key" {
+  type    = string
+  default = ""
+}
+variable "lazada_app_secret" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+variable "lazada_oauth_state_secret" {
+  description = "Separate secret (>=32 bytes) signing short-lived OAuth state, e.g. openssl rand -hex 32"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+variable "lazada_callback_url" {
+  description = "Exact public HTTPS callback configured in Lazada Seller In-house App"
+  type        = string
+  default     = "https://api.sai.makeasy.id.vn/api/v1/integrations/lazada/callback"
+}
