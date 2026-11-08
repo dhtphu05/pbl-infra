@@ -72,7 +72,12 @@ locals {
 
   service_environment = {
     sales       = { INVENTORY_URL = "http://inventory:${local.service_port}" }
-    integration = { SALES_SERVICE_URL = "http://sales:${local.service_port}" }
+    integration = {
+      SALES_SERVICE_URL    = "http://sales:${local.service_port}"
+      LAZADA_LIVE_ENABLED  = tostring(var.lazada_live_enabled)
+      LAZADA_APP_KEY       = var.lazada_app_key
+      LAZADA_CALLBACK_URL  = var.lazada_callback_url
+    }
   }
 
   # SSM parameter ARNs by env var name
@@ -94,7 +99,10 @@ locals {
         INTERNAL_S2S_TOKEN = aws_ssm_parameter.shared["INTERNAL_S2S_TOKEN"].arn
       },
       name == "platform" ? local.platform_secret_arns : {},
-      name == "integration" ? { INTEGRATION_CREDENTIAL_MASTER_KEY = aws_ssm_parameter.integration_master_key.arn } : {},
+      name == "integration" ? merge(
+        { INTEGRATION_CREDENTIAL_MASTER_KEY = aws_ssm_parameter.integration_master_key.arn },
+        { for key, parameter in aws_ssm_parameter.lazada : key => parameter.arn }
+      ) : {},
     )
   }
 }
