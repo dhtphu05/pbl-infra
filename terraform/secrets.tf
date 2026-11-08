@@ -54,3 +54,19 @@ resource "aws_ssm_parameter" "integration_master_key" {
   type  = "SecureString"
   value = var.integration_credential_master_key
 }
+
+# Optional Lazada secrets. Values flow to ECS via SSM SecureString, not container env plaintext in task definitions.
+# Like existing secrets in this project, Terraform state also contains sensitive
+# values; keep remote state encrypted and restrict access.
+locals {
+  lazada_secret_values = {
+    LAZADA_APP_SECRET         = var.lazada_app_secret
+    LAZADA_OAUTH_STATE_SECRET = var.lazada_oauth_state_secret
+  }
+}
+resource "aws_ssm_parameter" "lazada" {
+  for_each = var.lazada_live_enabled ? toset(["LAZADA_APP_SECRET", "LAZADA_OAUTH_STATE_SECRET"]) : toset([])
+  name     = "/pbl/integration/${each.key}"
+  type     = "SecureString"
+  value    = local.lazada_secret_values[each.key]
+}
